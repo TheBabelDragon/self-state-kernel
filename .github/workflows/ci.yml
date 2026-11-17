@@ -15,8 +15,10 @@ jobs:
       - run: python self_state_kernel.py
       - run: python tests/test_kernel_corrections.py
       - run: python tests/test_parity_vectors.py
-      - name: generated vectors up to date
-        run: python scripts/generate_rust_vectors.py --check
+      - name: fixture generates cleanly
+        run: |
+          python scripts/generate_rust_vectors.py
+          python scripts/generate_rust_vectors.py --check
   rust:
     runs-on: ubuntu-latest
     steps:
@@ -24,10 +26,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: regenerate and verify fixture binding
-        run: |
-          python scripts/generate_rust_vectors.py
-          python scripts/generate_rust_vectors.py --check
+      - name: bind shared fixture into host
+        run: python scripts/generate_rust_vectors.py
       - uses: dtolnay/rust-toolchain@1.75.0
         with:
           components: rustfmt, clippy
