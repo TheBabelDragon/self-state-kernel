@@ -1,6 +1,13 @@
 {
-  "format": "self-state-kernel-vectors/0.1",
+  "format": "self-state-kernel-vectors/0.1.1",
   "cases": [
+    {
+      "name": "missing-intermediate",
+      "ops": [
+        {"op": "lookup", "path": "a.b", "presence": "absent"},
+        {"op": "version", "eq": 0}
+      ]
+    },
     {
       "name": "missing-null-value",
       "ops": [
@@ -13,10 +20,29 @@
       ]
     },
     {
-      "name": "path-conflict",
+      "name": "scalar-intermediate",
       "ops": [
         {"op": "set", "path": "machine", "value": 42, "ok": true},
-        {"op": "set", "path": "machine.temperature", "value": 80, "ok": false},
+        {"op": "lookup", "path": "machine.temperature", "presence": "type_conflict"},
+        {"op": "set", "path": "machine.temperature", "value": 80, "ok": false, "error": "type_conflict"},
+        {"op": "version", "eq": 1}
+      ]
+    },
+    {
+      "name": "null-intermediate",
+      "ops": [
+        {"op": "set", "path": "machine", "value": null, "ok": true},
+        {"op": "lookup", "path": "machine.temperature", "presence": "null_traversal"},
+        {"op": "set", "path": "machine.temperature", "value": 80, "ok": false, "error": "null_traversal"},
+        {"op": "lookup", "path": "machine", "presence": "null"},
+        {"op": "version", "eq": 1}
+      ]
+    },
+    {
+      "name": "nested-valid",
+      "ops": [
+        {"op": "set", "path": "a.b.c", "value": 7, "ok": true},
+        {"op": "lookup", "path": "a.b.c", "presence": "value"},
         {"op": "version", "eq": 1}
       ]
     },

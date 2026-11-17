@@ -16,13 +16,21 @@ use alloc::string::String;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 
-pub const SCHEMA_VERSION: &str = "self-state-kernel/0.1";
+pub const SCHEMA_VERSION: &str = "self-state-kernel/0.1.1";
 
+/// Leaf or traversal outcome for a path lookup.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Presence {
+    /// Path component does not exist.
     Absent,
+    /// Leaf path exists and is null.
     Null,
+    /// Leaf path exists with a concrete value.
     Value,
+    /// Intermediate value is a non-container (scalar); cannot descend.
+    TypeConflict,
+    /// Intermediate value is explicit null; cannot descend.
+    NullTraversal,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -30,6 +38,7 @@ pub enum ErrorCode {
     Path,
     Value,
     TypeConflict,
+    NullTraversal,
     NotFound,
 }
 
@@ -132,23 +141,28 @@ impl Store {
         self.version
     }
 
+    /// Lookup with full traversal classification.
     pub fn lookup(&self, path: &str) -> StateResult<(Presence, Option<&Value>)> {
         let parts = split_path(path)?;
         let mut current_map = &self.root;
         for (i, part) in parts.iter().enumerate() {
+            let is_last = i + 1 == parts.len();
             match current_map.get(*part) {
                 None => return Ok((Presence::Absent, None)),
-                Some(Value::Null) if i + 1 == parts.len() => {
-                    return Ok((Presence::Null, Some(&Value::Null)))
+                Some(Value::Null) if is_last => {
+                    return Ok((Presence::Null, Some(&Value::Null)));
                 }
-                Some(Value::Map(m)) if i + 1 < parts.len() => {
+                Some(Value::Null) => {
+                    return Ok((Presence::NullTraversal, None));
+                }
+                Some(Value::Map(m)) if !is_last => {
                     current_map = m;
                 }
-                Some(v) if i + 1 == parts.len() => {
+                Some(v) if is_last => {
                     return Ok((Presence::Value, Some(v)));
                 }
                 Some(_) => {
-                    return Ok((Presence::Absent, None));
+                    return Ok((Presence::TypeConflict, None));
                 }
             }
         }
@@ -173,8 +187,14 @@ impl Store {
                 map.insert((*part).into(), value);
                 break;
             }
-            match map.get_mut(*part) {
+            match map.get(*part) {
                 Some(Value::Map(_)) => {}
+                Some(Value::Null) => {
+                    return Err(StateError {
+                        code: ErrorCode::NullTraversal,
+                        message: "null intermediate",
+                    });
+                }
                 Some(_) => {
                     return Err(StateError {
                         code: ErrorCode::TypeConflict,
@@ -218,13 +238,45 @@ mod tests {
     }
 
     #[test]
-    fn path_conflict() {
+    fn scalar_intermediate_lookup() {
         let mut s = Store::new();
         s.set("machine", Value::I64(42)).unwrap();
-        let err = s.set("machine.temperature", Value::I64(80));
-        assert!(err.is_err());
+        assert_eq!(
+            s.lookup("machine.temperature").unwrap().0,
+            Presence::TypeConflict
+        );
+    }
+
+    #[test]
+    fn null_intermediate_lookup() {
+        let mut s = Store::new();
+        s.set("machine", Value::Null).unwrap();
+        assert_eq!(
+            s.lookup("machine.temperature").unwrap().0,
+            Presence::NullTraversal
+        );
+    }
+
+    #[test]
+    fn path_conflict_write_atomic() {
+        let mut s = Store::new();
+        s.set("machine", Value::I64(42)).unwrap();
+        let v = s.version();
+        let err = s.set("machine.temperature", Value::I64(80)).unwrap_err();
+        assert_eq!(err.code, ErrorCode::TypeConflict);
         assert_eq!(s.get("machine"), Some(&Value::I64(42)));
-        assert_eq!(s.version(), 1);
+        assert_eq!(s.version(), v);
+    }
+
+    #[test]
+    fn null_intermediate_write_atomic() {
+        let mut s = Store::new();
+        s.set("machine", Value::Null).unwrap();
+        let v = s.version();
+        let err = s.set("machine.temperature", Value::I64(80)).unwrap_err();
+        assert_eq!(err.code, ErrorCode::NullTraversal);
+        assert_eq!(s.lookup("machine").unwrap().0, Presence::Null);
+        assert_eq!(s.version(), v);
     }
 
     #[test]
@@ -248,5 +300,13 @@ mod tests {
         s.set("a", Value::I64(1)).unwrap();
         s.set("b", Value::I64(2)).unwrap();
         assert_eq!(s.version(), 2);
+    }
+
+    #[test]
+    fn nested_valid() {
+        let mut s = Store::new();
+        s.set("a.b.c", Value::I64(7)).unwrap();
+        assert_eq!(s.lookup("a.b.c").unwrap().0, Presence::Value);
+        assert_eq!(s.get("a.b.c"), Some(&Value::I64(7)));
     }
 }
