@@ -1,0 +1,14 @@
+[package]
+name = "self-state-host"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Host tests and parity harness for SELF-State Kernel"
+rust-version.workspace = true
+
+[dependencies]
+self-state-core = { path = "../self-state-core" }
+
+[[bin]]
+name = "self-state-host"
+path = "src/main.rs"
