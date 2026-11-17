@@ -1,0 +1,91 @@
+{
+  "format": "self-state-kernel-vectors/0.1.2",
+  "cases": [
+    {
+      "name": "missing-intermediate",
+      "ops": [
+        {"op": "lookup", "path": "a.b", "presence": "absent"},
+        {"op": "version", "eq": 0}
+      ],
+      "final_version": 0,
+      "final_paths": {}
+    },
+    {
+      "name": "leaf-null-and-value",
+      "ops": [
+        {"op": "lookup", "path": "a.b", "presence": "absent"},
+        {"op": "set", "path": "a.b", "value": null, "ok": true},
+        {"op": "lookup", "path": "a.b", "presence": "null"},
+        {"op": "set", "path": "a.b", "value": 1, "ok": true},
+        {"op": "lookup", "path": "a.b", "presence": "value"},
+        {"op": "version", "eq": 2}
+      ],
+      "final_version": 2,
+      "final_paths": {"a.b": 1}
+    },
+    {
+      "name": "scalar-intermediate-lookup-and-write",
+      "ops": [
+        {"op": "set", "path": "machine", "value": 42, "ok": true},
+        {"op": "lookup", "path": "machine.temperature", "presence": "type_conflict"},
+        {"op": "set", "path": "machine.temperature", "value": 80, "ok": false, "error": "type_conflict"},
+        {"op": "version", "eq": 1}
+      ],
+      "final_version": 1,
+      "final_paths": {"machine": 42}
+    },
+    {
+      "name": "null-intermediate-lookup-and-write",
+      "ops": [
+        {"op": "set", "path": "machine", "value": null, "ok": true},
+        {"op": "lookup", "path": "machine.temperature", "presence": "null_traversal"},
+        {"op": "set", "path": "machine.temperature", "value": 80, "ok": false, "error": "null_traversal"},
+        {"op": "lookup", "path": "machine", "presence": "null"},
+        {"op": "version", "eq": 1}
+      ],
+      "final_version": 1,
+      "final_paths": {"machine": null}
+    },
+    {
+      "name": "nested-valid",
+      "ops": [
+        {"op": "set", "path": "a.b.c", "value": 7, "ok": true},
+        {"op": "lookup", "path": "a.b.c", "presence": "value"},
+        {"op": "version", "eq": 1}
+      ],
+      "final_version": 1,
+      "final_paths": {"a.b.c": 7}
+    },
+    {
+      "name": "empty-path",
+      "ops": [
+        {"op": "set", "path": "", "value": 1, "ok": false, "error": "path"},
+        {"op": "version", "eq": 0}
+      ],
+      "final_version": 0,
+      "final_paths": {}
+    },
+    {
+      "name": "failed-value-validation-nan",
+      "ops": [
+        {"op": "set", "path": "x", "value": 1, "ok": true},
+        {"op": "set", "path": "bad", "value": {"__special__": "nan"}, "ok": false, "error": "value"},
+        {"op": "version", "eq": 1}
+      ],
+      "final_version": 1,
+      "final_paths": {"x": 1}
+    },
+    {
+      "name": "unrelated-field-preserved-on-failed-write",
+      "ops": [
+        {"op": "set", "path": "keep", "value": 99, "ok": true},
+        {"op": "set", "path": "machine", "value": 42, "ok": true},
+        {"op": "set", "path": "machine.temperature", "value": 80, "ok": false, "error": "type_conflict"},
+        {"op": "lookup", "path": "keep", "presence": "value"},
+        {"op": "version", "eq": 2}
+      ],
+      "final_version": 2,
+      "final_paths": {"keep": 99, "machine": 42}
+    }
+  ]
+}
