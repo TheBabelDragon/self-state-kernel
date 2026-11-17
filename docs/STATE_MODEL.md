@@ -10,17 +10,19 @@
 | `type_conflict` | Intermediate is a non-container (e.g. integer); cannot descend |
 | `null_traversal` | Intermediate is explicit null; cannot descend |
 
-`GET(path, default)` returns `default` only when the leaf is **absent**. Explicit null is returned as `None`. Traversal conflicts are not “missing”.
+`GET(path, default)` returns `default` only when the leaf is **absent**.
 
 ## Mutation atomicity
 
-1. Validate value and path.
-2. Apply on a deep copy of the store.
-3. On success: swap root and increment version by 1.
-4. On failure: leave root and version **unchanged**. No partial containers.
+Validate → apply on copy → swap on success → increment version. Failures leave state and version unchanged.
 
-Failed writes caused by scalar or null intermediates do not create nested maps.
+## Shared fixture contract
 
-## Version
+`vectors/state_vectors.json` is the **single source of truth**.
 
-Version increments **only** after a successful mutation. Failed validation or traversal leaves version identical.
+- Format: `self-state-kernel-vectors/0.1.2`
+- Python: `tests/test_parity_vectors.py` runs the JSON directly
+- Rust: `scripts/generate_rust_vectors.py` emits `generated_vectors.rs`
+- CI fails if generated output is stale
+
+Each case includes ops, expected presence/error labels, `final_version`, and `final_paths`.
