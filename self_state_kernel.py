@@ -1,1 +1,66 @@
-# SEE LOCAL - tool size limit workaround starting
+# -*- coding: utf-8 -*-
+"""SELF-State Kernel — public entry (implementation in _kernel_impl)."""
+from __future__ import annotations
+
+from _kernel_impl import (  # noqa: F401
+    DEFAULT_ANGELIC_PAIRS,
+    DEFAULT_GEMATRIA,
+    AngelicCipherModule,
+    Clock,
+    Decision,
+    DecisionStatus,
+    HostClock,
+    Kernel,
+    KernelConditionError,
+    KernelDispatchError,
+    KernelError,
+    KernelPathError,
+    KernelRegistryError,
+    KernelResult,
+    KernelState,
+    KernelValueError,
+    LogicalClock,
+    LookupResult,
+    Presence,
+    SelfContext,
+    TraceRecord,
+    create_kernel,
+    demo,
+    self_test,
+    strict_bool,
+    validate_value,
+    canonical_json,
+)
+
+__all__ = [
+    "DEFAULT_ANGELIC_PAIRS",
+    "DEFAULT_GEMATRIA",
+    "AngelicCipherModule",
+    "Clock",
+    "Decision",
+    "DecisionStatus",
+    "HostClock",
+    "Kernel",
+    "KernelConditionError",
+    "KernelDispatchError",
+    "KernelError",
+    "KernelPathError",
+    "KernelRegistryError",
+    "KernelResult",
+    "KernelState",
+    "KernelValueError",
+    "LogicalClock",
+    "LookupResult",
+    "Presence",
+    "SelfContext",
+    "TraceRecord",
+    "create_kernel",
+    "demo",
+    "self_test",
+    "strict_bool",
+    "validate_value",
+    "canonical_json",
+]
+
+if __name__ == "__main__":
+    demo()
