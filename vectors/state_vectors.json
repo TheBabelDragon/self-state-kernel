@@ -1,0 +1,31 @@
+{
+  "format": "self-state-kernel-vectors/0.1",
+  "cases": [
+    {
+      "name": "missing-null-value",
+      "ops": [
+        {"op": "lookup", "path": "a.b", "presence": "absent"},
+        {"op": "set", "path": "a.b", "value": null, "ok": true},
+        {"op": "lookup", "path": "a.b", "presence": "null"},
+        {"op": "set", "path": "a.b", "value": 1, "ok": true},
+        {"op": "lookup", "path": "a.b", "presence": "value"},
+        {"op": "version", "eq": 2}
+      ]
+    },
+    {
+      "name": "path-conflict",
+      "ops": [
+        {"op": "set", "path": "machine", "value": 42, "ok": true},
+        {"op": "set", "path": "machine.temperature", "value": 80, "ok": false},
+        {"op": "version", "eq": 1}
+      ]
+    },
+    {
+      "name": "empty-path",
+      "ops": [
+        {"op": "set", "path": "", "value": 1, "ok": false},
+        {"op": "version", "eq": 0}
+      ]
+    }
+  ]
+}
