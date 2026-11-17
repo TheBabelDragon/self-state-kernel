@@ -17,12 +17,23 @@ cargo test --workspace
 
 | Path | Role |
 |------|------|
-| `self_state_kernel.py` | Corrected Python reference |
+| `self_state_kernel.py` | Public entry (re-exports) |
+| `_kernel_impl.py` | Full Python reference implementation |
 | `crates/self-state-core` | `no_std` state store + value model |
 | `crates/self-state-host` | Host tests + shared vector runner |
 | `vectors/` | Cross-implementation test vectors |
 | `docs/` | Architecture and contracts |
 
-## Status
+## Status (v0.1.1)
 
-v0.1 corrections: presence vs null, atomic nested paths, injectable clock, explicit results, registry safety, integrity scopes, CMD4 FAIL_SAFE semantics, Rust foundation + parity vectors.
+Corrections:
+
+- Presence: `absent` / `null` / `value` / **`type_conflict`** / **`null_traversal`**
+- Nested path conflicts and null intermediates rejected atomically
+- Injectable logical clock; explicit `KernelResult` (no truthiness)
+- Registry safety; integrity scopes; CMD4 FAIL_SAFE semantics
+- Rust foundation + shared parity vectors
+
+## License
+
+MIT
