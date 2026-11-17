@@ -1,5 +1,7 @@
 //! Fixture types shared by generated vectors and the runner.
 
+#![allow(dead_code)]
+
 #[derive(Debug, Clone)]
 pub enum JsonValue {
     Null,
