@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = ["crates/self-state-core", "crates/self-state-host"]
+default-members = ["crates/self-state-host"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["TheBabelDragon"]
+repository = "https://github.com/TheBabelDragon/self-state-kernel"
+rust-version = "1.75"
