@@ -30,6 +30,19 @@ from _kernel_impl import (  # noqa: F401
     strict_bool,
     validate_value,
     canonical_json,
+    # v0.2 Angelic Cipher authority
+    ANGELIC_AUTHORITY,
+    ANGELIC_AUTHORITY_VERSION,
+    ANGELIC_RESULT_CONTRACT_VERSION,
+    PROFILE_LEGACY_EXPERIMENTAL,
+    PROFILE_LEGACY_EXPERIMENTAL_VERSION,
+    MAPPING_ID_LEGACY_AZ,
+    CalculationStatus,
+    AngelicCipherError,
+    CipherResult,
+    MappingProfile,
+    AngelicCipher,
+    build_legacy_experimental_profile,
 )
 
 __all__ = [
@@ -60,6 +73,19 @@ __all__ = [
     "strict_bool",
     "validate_value",
     "canonical_json",
+    # v0.2
+    "ANGELIC_AUTHORITY",
+    "ANGELIC_AUTHORITY_VERSION",
+    "ANGELIC_RESULT_CONTRACT_VERSION",
+    "PROFILE_LEGACY_EXPERIMENTAL",
+    "PROFILE_LEGACY_EXPERIMENTAL_VERSION",
+    "MAPPING_ID_LEGACY_AZ",
+    "CalculationStatus",
+    "AngelicCipherError",
+    "CipherResult",
+    "MappingProfile",
+    "AngelicCipher",
+    "build_legacy_experimental_profile",
 ]
 
 if __name__ == "__main__":

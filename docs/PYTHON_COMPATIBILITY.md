@@ -1,16 +1,27 @@
-# Python Compatibility
+# Python compatibility notes
 
-Preserved: SELF.GET/SET/SNAPSHOT, QUERY, RUN, IF, CMD4, TRACE, INTEGRITY, register_*, strict_bool, passthrough, create_kernel, self_test.
+## v0.1.1 → v0.2.0
 
-Changed: defensive `kernel.state`; no `bool(KernelResult)`; path conflicts; registry safety; integrity scopes; CMD4 structured status; presence includes `type_conflict` / `null_traversal`.
+### Angelic Cipher
 
-## Shared vectors
+- `AngelicCipherModule` still registers the same four commands.
+- Default constructor arguments (`gematria=`, `pairs=`) still work.
+- Return values of `encode` / `verify` gain an extra `_cipher_result` key;
+  existing keys (`input`, `codes`, `checksum`, `ok`, `original`, `decoded`)
+  retain prior meaning and types.
+- `decode` still returns a `str`.
+- `checksum` still returns an `int`.
+- Collision / unmapped errors still surface as `KernelValueError` when invoked
+  through the kernel.
 
-Python and Rust agree on `vectors/state_vectors.json`:
+### New public symbols
 
-- Lookup classifications
-- Write success/failure and error labels
-- Final version and final path values
-- Failed-write atomicity
+Importable from `self_state_kernel` and `angelic_cipher`:
 
-Do not edit `generated_vectors.rs` by hand; regenerate from the JSON fixture.
+- `AngelicCipher`, `CipherResult`, `CalculationStatus`, `AngelicCipherError`
+- `PROFILE_LEGACY_EXPERIMENTAL`, `MAPPING_ID_LEGACY_AZ`, etc.
+
+### Kernel schema
+
+`Kernel.SCHEMA_VERSION` is now `self-state-kernel/0.2.0`. Registry identity
+hashes therefore change; state parity vectors are unaffected in semantics.
